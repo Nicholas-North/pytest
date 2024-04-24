@@ -130,6 +130,18 @@ test from having to care about setting/resetting
 output streams and also interacts well with pytest's
 own per-test capturing.
 
+However, once called ``readouterr()`` will destructively
+capture output. This means that instead of continuing to
+be sent to console after capture, it will instead only be
+held in the out, err tuple that ``readouterr()`` creates.
+
+To combat this, there's now a new optional function 
+called ``copyouterr()``. This accomplishes the same
+goal as ``readouterr()``, however, it does not reset
+the stderr/stdout streams nor block the normal output
+to terminal. It's a member function of CaptureFixture(),
+and can be called from any instance of it.
+
 If you want to capture on filedescriptor level you can use
 the ``capfd`` fixture which offers the exact
 same interface but allows to also capture output from

@@ -927,7 +927,7 @@ class CaptureFixture(Generic[AnyStr]):
             self._capture = None
 
     def readouterr(self) -> CaptureResult[AnyStr]:
-        """Read and return the captured output so far, resetting the internal
+        """Read and return the captured output so far, resetting the  
         buffer.
 
         :returns:
@@ -941,6 +941,30 @@ class CaptureFixture(Generic[AnyStr]):
             captured_err += err
         self._captured_out = self.captureclass.EMPTY_BUFFER
         self._captured_err = self.captureclass.EMPTY_BUFFER
+        return CaptureResult(captured_out, captured_err)
+
+    # Nicks Code Additions
+    def copyouterr(self) -> CaptureResult[AnyStr]:
+        """Non-destructive capture of the stdout/stderr streams for use in
+        test validation, such that the streams remain intact for captured
+        stdout call test results
+        
+        :returns:
+            The captured content as a namedtuple with ``out`` and ``err``
+            string attributes.
+        """
+        captured_out, captured_err = self._captured_out, self._captured_err
+        if self._capture is not None:
+            out, err = self._capture.readouterr()
+            # captures the output in the variables out & err, but also 
+            # ensures that the events are still written
+            sys.stdout.write(out)
+            sys.stderr.write(err)
+            captured_out += out
+            captured_err += err
+        # gets rid of resetting buffer
+        # self._captured_out = self.captureclass.EMPTY_BUFFER
+        # self._captured_err = self.captureclass.EMPTY_BUFFER
         return CaptureResult(captured_out, captured_err)
 
     def _suspend(self) -> None:
